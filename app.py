@@ -75,10 +75,6 @@ def calculate_delivery_cost(centers_needed, total_weight):
 
     return int(route_distance * cost_per_unit)
 
-@app.route('/', methods=['GET'])
-def home():
-    return "Delivery Cost Calculator API is running!"
-
 @app.route('/calculate-delivery-cost', methods=['POST'])
 def calculate_cost():
     try:
