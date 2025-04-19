@@ -40,30 +40,25 @@ def calculate_total_weight(order):
     return sum(WEIGHTS[product] * quantity for product, quantity in order.items() if quantity > 0)
 
 def calculate_delivery_cost(centers_needed, total_weight):
-    routes = {
-        'C1': DISTANCES['C1_L1'] * 2,
-        'C2': DISTANCES['C2_L1'] * 2,
-        'C3': DISTANCES['C3_L1'] * 2,
-        'C1_C2': DISTANCES['C1_C2'] + DISTANCES['C2_L1'] + DISTANCES['C1_L1'],
-        'C2_C3': DISTANCES['C2_C3'] + DISTANCES['C3_L1'] + DISTANCES['C2_L1'],
-        'C1_C3': DISTANCES['C1_L1'] + DISTANCES['C3_L1'] + 5,
-        'C1_C2_C3': DISTANCES['C1_C2'] + DISTANCES['C2_C3'] + DISTANCES['C3_L1'] + DISTANCES['C1_L1']
-    }
-
-    needed = [center for center, needed in centers_needed.items() if needed]
-    
-    if len(needed) == 1:
-        route_distance = routes[needed[0]]
-    elif len(needed) == 2:
-        if 'C1' in needed and 'C2' in needed:
-            route_distance = routes['C1_C2']
-        elif 'C2' in needed and 'C3' in needed:
-            route_distance = routes['C2_C3']
-        elif 'C1' in needed and 'C3' in needed:
-            route_distance = routes['C1_C3']
+    # Calculate the route distance based on the centers needed
+    if centers_needed['C1'] and centers_needed['C2'] and centers_needed['C3']:
+        route_distance = DISTANCES['C1_C2'] + DISTANCES['C2_C3'] + DISTANCES['C3_L1'] + DISTANCES['C1_L1']
+    elif centers_needed['C1'] and centers_needed['C2']:
+        route_distance = DISTANCES['C1_C2'] + DISTANCES['C2_L1'] + DISTANCES['C1_L1']
+    elif centers_needed['C2'] and centers_needed['C3']:
+        route_distance = DISTANCES['C2_C3'] + DISTANCES['C3_L1'] + DISTANCES['C2_L1']
+    elif centers_needed['C1'] and centers_needed['C3']:
+        route_distance = DISTANCES['C1_C3'] + DISTANCES['C3_L1'] + DISTANCES['C1_L1']
+    elif centers_needed['C1']:
+        route_distance = DISTANCES['C1_L1'] * 2
+    elif centers_needed['C2']:
+        route_distance = DISTANCES['C2_L1'] * 2
+    elif centers_needed['C3']:
+        route_distance = DISTANCES['C3_L1'] * 2
     else:
-        route_distance = routes['C1_C2_C3']
+        route_distance = 0
 
+    # Determine the cost per unit weight
     if total_weight <= 5:
         cost_per_unit = 10
     elif total_weight <= 15:
@@ -73,6 +68,7 @@ def calculate_delivery_cost(centers_needed, total_weight):
     else:
         cost_per_unit = 25
 
+    # Calculate the total cost
     return int(route_distance * cost_per_unit)
 
 @app.route('/calculate-delivery-cost', methods=['POST'])
